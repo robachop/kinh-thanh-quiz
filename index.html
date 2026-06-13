@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>App Câu Đố — Full Prototype</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: #0f0a1e;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.app {
+  width: 100%;
+  max-width: 390px;
+  min-height: 720px;
+  background: #1a0a2e;
+  border-radius: 36px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+}
+
+/* ── SCREEN BASE ── */
+.screen {
+  display: none;
+  flex-direction: column;
+  min-height: 720px;
+  padding: 40px 24px 32px;
+  animation: fadeIn 0.3s ease;
+}
+.screen.active { display: flex; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── SHARED ── */
+.btn-primary {
+  width: 100%;
+  background: linear-gradient(135deg, #7c4dff, #00b4d8);
+  border: none; border-radius: 16px;
+  color: #fff; font-size: 16px; font-weight: 700;
+  padding: 16px; cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-primary:hover { opacity: 0.88; }
+.btn-primary:active { transform: scale(0.97); }
+.btn-ghost {
+  width: 100%;
+  background: rgba(255,255,255,0.07);
+  border: 1.5px solid rgba(255,255,255,0.15);
+  border-radius: 16px;
+  color: rgba(255,255,255,0.8); font-size: 15px; font-weight: 600;
+  padding: 14px; cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.12); }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 20px; padding: 6px 14px;
+  font-size: 13px; font-weight: 700; color: #fff;
+}
+
+/* ════════════════════════════════
+   SCREEN 1 — HOME
+════════════════════════════════ */
+#screenHome {
+  justify-content: space-between;
+  background: radial-gradient(ellipse at 50% 10%, rgba(124,77,255,0.3) 0%, transparent 60%), #1a0a2e;
+}
+.home-top { text-align: center; padding-top: 20px; }
+.home-logo { font-size: 52px; margin-bottom: 8px; }
+.home-title { font-size: 28px; font-weight: 900; color: #fff; letter-spacing: -0.5px; }
+.home-sub { color: rgba(255,255,255,0.45); font-size: 13px; margin-top: 4px; }
+
+.home-stats {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  margin: 24px 0;
+}
+.stat-card {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px; padding: 18px 16px; text-align: center;
+}
+.stat-icon { font-size: 26px; margin-bottom: 6px; }
+.stat-val { font-size: 26px; font-weight: 900; color: #fff; }
+.stat-label { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px; text-transform: uppercase; letter-spacing: 1px; }
+
+.mana-bar-wrap { margin: 0 0 8px; }
+.mana-label { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px; color: rgba(255,255,255,0.5); }
+.mana-bar-bg { height: 8px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; }
+.mana-bar { height: 100%; width: 60%; background: linear-gradient(90deg, #00e5ff, #7c4dff); border-radius: 4px; }
+
+.home-bottom { display: flex; flex-direction: column; gap: 10px; }
+
+/* ════════════════════════════════
+   SCREEN 2 — CHỌN CHẾ ĐỘ
+════════════════════════════════ */
+#screenMode { justify-content: flex-start; }
+.mode-header { text-align: center; margin-bottom: 32px; margin-top: 10px; }
+.mode-header h2 { font-size: 22px; font-weight: 800; color: #fff; }
+.mode-header p { color: rgba(255,255,255,0.4); font-size: 13px; margin-top: 4px; }
+
+.mode-card {
+  background: rgba(255,255,255,0.05);
+  border: 2px solid rgba(255,255,255,0.1);
+  border-radius: 24px; padding: 24px; cursor: pointer;
+  transition: all 0.25s; margin-bottom: 14px;
+  -webkit-tap-highlight-color: transparent;
+}
+.mode-card:hover { border-color: #7c4dff; background: rgba(124,77,255,0.1); transform: translateY(-2px); }
+.mode-card:active { transform: scale(0.98); }
+.mode-card-icon { font-size: 38px; margin-bottom: 10px; }
+.mode-card-title { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+.mode-card-desc { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.5; }
+.mode-card-badge {
+  display: inline-block; margin-top: 10px;
+  background: rgba(255,215,0,0.15); border: 1px solid rgba(255,215,0,0.3);
+  color: #ffd700; font-size: 11px; font-weight: 700;
+  padding: 3px 10px; border-radius: 10px;
+}
+.mode-card.endless { border-color: rgba(0,229,255,0.3); }
+.mode-card.endless:hover { border-color: #00e5ff; background: rgba(0,229,255,0.08); }
+.mode-card.endless .mode-card-badge { background: rgba(0,229,255,0.1); border-color: rgba(0,229,255,0.3); color: #00e5ff; }
+
+.btn-back {
+  background: none; border: none;
+  color: rgba(255,255,255,0.4); font-size: 14px;
+  cursor: pointer; padding: 10px 0; margin-top: 8px;
+}
+.btn-back:hover { color: #fff; }
+
+/* ════════════════════════════════
+   SCREEN 3 — GAME
+════════════════════════════════ */
+#screenGame { padding-top: 28px; }
+.game-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.progress-text { color: rgba(255,255,255,0.5); font-size: 13px; }
+.score-chip { background: rgba(255,215,0,0.15); border: 1px solid rgba(255,215,0,0.3); border-radius: 20px; padding: 5px 14px; color: #ffd700; font-size: 14px; font-weight: 700; }
+.score-chip span { color: rgba(255,255,255,0.5); font-weight: 400; font-size: 12px; margin-right: 3px; }
+
+.timer-wrap { margin-bottom: 14px; position: relative; padding-top: 20px; }
+.timer-num { position: absolute; right: 0; top: 0; color: #fff; font-size: 13px; font-weight: 700; }
+.timer-bar-bg { height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; }
+.timer-bar { height: 100%; background: linear-gradient(90deg, #00e5ff, #7c4dff); border-radius: 3px; transition: width 1s linear; width: 100%; }
+.timer-bar.warn { background: linear-gradient(90deg, #ff6b35, #ff0055); }
+
+.clue-board {
+  background: linear-gradient(135deg, #2d1b69, #11144c);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px; padding: 18px; margin-bottom: 14px;
+}
+.clue-board-title { color: rgba(255,255,255,0.35); font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; }
+.clue-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding: 11px 12px; border-radius: 12px; min-height: 48px; transition: all 0.35s; }
+.clue-item.hidden { background: rgba(255,255,255,0.04); border: 1px dashed rgba(255,255,255,0.1); }
+.clue-item.revealed { background: rgba(124,77,255,0.18); border: 1px solid rgba(124,77,255,0.35); }
+.clue-item.current { background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.45); box-shadow: 0 0 14px rgba(0,229,255,0.12); }
+.clue-num { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; }
+.clue-item.hidden .clue-num { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.2); }
+.clue-item.revealed .clue-num { background: #7c4dff; color: #fff; }
+.clue-item.current .clue-num { background: #00e5ff; color: #000; }
+.clue-text { font-size: 13px; line-height: 1.5; display: none; }
+.clue-item.revealed .clue-text { display: block; color: rgba(255,255,255,0.7); }
+.clue-item.current .clue-text { display: block; color: #fff; }
+.clue-lock { display: none; color: rgba(255,255,255,0.2); font-size: 12px; align-items: center; gap: 5px; }
+.clue-item.hidden .clue-lock { display: flex; }
+
+.points-badge { display: inline-block; background: rgba(255,215,0,0.12); border: 1px solid rgba(255,215,0,0.25); color: #ffd700; font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 10px; margin-bottom: 12px; }
+.answers { display: flex; flex-direction: column; gap: 7px; margin-bottom: 10px; }
+.btn-answer { width: 100%; background: rgba(255,255,255,0.07); border: 1.5px solid rgba(255,255,255,0.13); border-radius: 14px; color: #fff; font-size: 14px; font-weight: 600; padding: 13px 14px; cursor: pointer; transition: all 0.18s; text-align: center; -webkit-tap-highlight-color: transparent; }
+.btn-answer:hover:not(:disabled) { background: rgba(124,77,255,0.28); border-color: #7c4dff; }
+.btn-answer.wrong { background: rgba(255,0,85,0.07); border-color: rgba(255,0,85,0.18); color: rgba(255,255,255,0.18); text-decoration: line-through; pointer-events: none; }
+.btn-answer.correct { background: rgba(0,200,100,0.22); border-color: #00c864; color: #00ff80; pointer-events: none; }
+.btn-answer.reveal-correct { background: rgba(0,200,100,0.15); border-color: #00c864; color: #00ff80; pointer-events: none; animation: pulse .5s ease; }
+@keyframes pulse { 50% { transform: scale(1.03); } }
+.btn-next-clue { width: 100%; background: linear-gradient(135deg,#7c4dff,#00b4d8); border: none; border-radius: 14px; color: #fff; font-size: 14px; font-weight: 700; padding: 13px; cursor: pointer; display: none; }
+.btn-next-clue.show { display: block; animation: fadeIn .25s ease; }
+
+/* ════════════════════════════════
+   SCREEN 4 — KẾT QUẢ CÂU
+════════════════════════════════ */
+#screenResult {
+  justify-content: center; align-items: center; text-align: center;
+  background: radial-gradient(ellipse at 50% 30%, rgba(124,77,255,0.2) 0%, transparent 60%), #1a0a2e;
+}
+.result-icon { font-size: 72px; margin-bottom: 16px; animation: popIn .4s cubic-bezier(0.175,0.885,0.32,1.275); }
+@keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+.result-title { font-size: 28px; font-weight: 900; color: #fff; margin-bottom: 8px; }
+.result-sub { color: rgba(255,255,255,0.5); font-size: 14px; margin-bottom: 6px; }
+.result-char { font-size: 16px; color: rgba(255,255,255,0.7); margin-bottom: 24px; }
+.result-pts { font-size: 48px; font-weight: 900; color: #ffd700; margin-bottom: 6px; }
+.result-pts-label { font-size: 14px; color: rgba(255,255,255,0.4); margin-bottom: 36px; }
+.result-actions { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+
+/* ════════════════════════════════
+   SCREEN 5 — KẾT THÚC SET
+════════════════════════════════ */
+#screenSetEnd {
+  justify-content: center; align-items: center; text-align: center;
+  background: radial-gradient(ellipse at 50% 20%, rgba(255,215,0,0.15) 0%, transparent 55%), #1a0a2e;
+}
+.setend-trophy { font-size: 80px; margin-bottom: 12px; animation: popIn .5s cubic-bezier(0.175,0.885,0.32,1.275); }
+.setend-title { font-size: 26px; font-weight: 900; color: #fff; margin-bottom: 4px; }
+.setend-sub { color: rgba(255,255,255,0.45); font-size: 13px; margin-bottom: 28px; }
+.setend-stats { width: 100%; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 28px; }
+.setend-stat { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 14px 8px; text-align: center; }
+.setend-stat-val { font-size: 24px; font-weight: 900; color: #fff; }
+.setend-stat-label { font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 3px; text-transform: uppercase; letter-spacing: .8px; }
+.setend-total { margin-bottom: 32px; }
+.setend-total-pts { font-size: 52px; font-weight: 900; color: #ffd700; line-height: 1; }
+.setend-total-label { font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 4px; }
+.setend-actions { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+
+/* ════════════════════════════════
+   SCREEN 6 — HẾT MA-NA
+════════════════════════════════ */
+#screenMana {
+  justify-content: center; align-items: center; text-align: center;
+  background: radial-gradient(ellipse at 50% 30%, rgba(0,180,216,0.15) 0%, transparent 55%), #1a0a2e;
+}
+.mana-icon { font-size: 72px; margin-bottom: 16px; animation: popIn .4s ease; }
+.mana-title { font-size: 26px; font-weight: 900; color: #fff; margin-bottom: 8px; }
+.mana-desc { color: rgba(255,255,255,0.5); font-size: 14px; line-height: 1.6; margin-bottom: 28px; max-width: 280px; }
+.mana-refill { background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.25); border-radius: 16px; padding: 16px 20px; margin-bottom: 28px; width: 100%; }
+.mana-refill-label { font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+.mana-refill-time { font-size: 28px; font-weight: 900; color: #00e5ff; }
+.mana-actions { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ══ SCREEN 1: HOME ══ -->
+  <div class="screen active" id="screenHome">
+    <div class="home-top">
+      <div class="home-logo">✝️</div>
+      <div class="home-title">Câu Đố Kinh Thánh</div>
+      <div class="home-sub">Tôi là ai?</div>
+    </div>
+
+    <div class="home-stats">
+      <div class="stat-card">
+        <div class="stat-icon">🏅</div>
+        <div class="stat-val" id="homeTalan">120</div>
+        <div class="stat-label">Ta-lân</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💧</div>
+        <div class="stat-val" id="homeMana">3/5</div>
+        <div class="stat-label">Ma-na</div>
+      </div>
+    </div>
+
+    <div class="mana-bar-wrap">
+      <div class="mana-label"><span>💧 Ma-na hôm nay</span><span id="manaText">3 / 5</span></div>
+      <div class="mana-bar-bg"><div class="mana-bar" id="manaBarHome" style="width:60%"></div></div>
+    </div>
+
+    <div class="home-bottom">
+      <button class="btn-primary" onclick="goTo('screenMode')">▶ Chơi ngay</button>
+      <button class="btn-ghost" onclick="goTo('screenMana')">💧 Xem Ma-na</button>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN 2: CHỌN CHẾ ĐỘ ══ -->
+  <div class="screen" id="screenMode">
+    <div class="mode-header">
+      <h2>Chọn chế độ chơi</h2>
+      <p>Còn 3 ma-na hôm nay</p>
+    </div>
+
+    <div class="mode-card" onclick="startGame('set')">
+      <div class="mode-card-icon">📋</div>
+      <div class="mode-card-title">Bộ 10 câu</div>
+      <div class="mode-card-desc">Chơi 10 câu liên tiếp, xem kết quả tổng kết ở cuối. Tốn 2 ma-na.</div>
+      <div class="mode-card-badge">🏆 Có tổng kết điểm</div>
+    </div>
+
+    <div class="mode-card endless" onclick="startGame('endless')">
+      <div class="mode-card-icon">♾️</div>
+      <div class="mode-card-title">Chơi mãi mãi</div>
+      <div class="mode-card-desc">Câu đố không bao giờ hết, độ khó tăng dần. Tốn 1 ma-na mỗi 5 câu.</div>
+      <div class="mode-card-badge" style="background:rgba(0,229,255,0.1);border-color:rgba(0,229,255,0.3);color:#00e5ff;">🔥 Độ khó tăng dần</div>
+    </div>
+
+    <button class="btn-back" onclick="goTo('screenHome')">← Quay lại</button>
+  </div>
+
+  <!-- ══ SCREEN 3: GAME ══ -->
+  <div class="screen" id="screenGame">
+    <div class="game-header">
+      <div class="progress-text" id="progressText">Câu 1 / 10</div>
+      <div class="score-chip"><span>Ta-lân:</span><span id="gameScore">120</span></div>
+    </div>
+
+    <div class="timer-wrap">
+      <div class="timer-num" id="timerNum">15</div>
+      <div class="timer-bar-bg"><div class="timer-bar" id="timerBar"></div></div>
+    </div>
+
+    <div class="clue-board">
+      <div class="clue-board-title" id="clueBoardTitle">🙋 Tôi là ai?</div>
+      <div class="clue-item hidden" id="clue0">
+        <div class="clue-num">1</div>
+        <div class="clue-text" id="ct0"></div>
+        <div class="clue-lock">🔒 Gợi ý đang ẩn</div>
+      </div>
+      <div class="clue-item hidden" id="clue1">
+        <div class="clue-num">2</div>
+        <div class="clue-text" id="ct1"></div>
+        <div class="clue-lock">🔒 Gợi ý đang ẩn</div>
+      </div>
+      <div class="clue-item hidden" id="clue2">
+        <div class="clue-num">3</div>
+        <div class="clue-text" id="ct2"></div>
+        <div class="clue-lock">🔒 Gợi ý đang ẩn</div>
+      </div>
+    </div>
+
+    <div class="points-badge" id="ptsBadge">⭐ Đúng lần này: 30 ta-lân</div>
+    <div class="answers" id="answers"></div>
+    <button class="btn-next-clue" id="btnNextClue" onclick="nextClue()">Xem gợi ý tiếp →</button>
+  </div>
+
+  <!-- ══ SCREEN 4: KẾT QUẢ CÂU ══ -->
+  <div class="screen" id="screenResult">
+    <div class="result-icon" id="resIcon">🏆</div>
+    <div class="result-title" id="resTitle">Đúng rồi!</div>
+    <div class="result-sub" id="resSub">Đoán ngay gợi ý đầu tiên!</div>
+    <div class="result-char" id="resChar">Nhân vật: <strong>Môi-se</strong></div>
+    <div class="result-pts" id="resPts">+30</div>
+    <div class="result-pts-label">ta-lân</div>
+    <div class="result-actions">
+      <button class="btn-primary" id="btnNextQ" onclick="nextQuestion()">Câu tiếp theo →</button>
+      <button class="btn-ghost" onclick="goTo('screenHome')">🏠 Về trang chủ</button>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN 5: KẾT THÚC SET ══ -->
+  <div class="screen" id="screenSetEnd">
+    <div class="setend-trophy">🏆</div>
+    <div class="setend-title">Hoàn thành!</div>
+    <div class="setend-sub">Bạn đã chơi xong 10 câu</div>
+    <div class="setend-stats">
+      <div class="setend-stat">
+        <div class="setend-stat-val" id="statCorrect">7</div>
+        <div class="setend-stat-label">Đúng</div>
+      </div>
+      <div class="setend-stat">
+        <div class="setend-stat-val" id="statWrong">3</div>
+        <div class="setend-stat-label">Sai</div>
+      </div>
+      <div class="setend-stat">
+        <div class="setend-stat-val" id="statBest">30</div>
+        <div class="setend-stat-label">Cao nhất</div>
+      </div>
+    </div>
+    <div class="setend-total">
+      <div class="setend-total-pts" id="statTotal">190</div>
+      <div class="setend-total-label">ta-lân kiếm được</div>
+    </div>
+    <div class="setend-actions">
+      <button class="btn-primary" onclick="startGame('set')">🔄 Chơi lại</button>
+      <button class="btn-ghost" onclick="goTo('screenHome')">🏠 Về trang chủ</button>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN 6: HẾT MA-NA ══ -->
+  <div class="screen" id="screenMana">
+    <div class="mana-icon">💧</div>
+    <div class="mana-title">Hết ma-na rồi!</div>
+    <div class="mana-desc">Bạn đã dùng hết ma-na hôm nay. Ma-na sẽ được nạp lại vào lúc nửa đêm.</div>
+    <div class="mana-refill">
+      <div class="mana-refill-label">⏰ Ma-na nạp lại sau</div>
+      <div class="mana-refill-time">05:42:17</div>
+    </div>
+    <div class="mana-actions">
+      <button class="btn-ghost" onclick="goTo('screenHome')">🏠 Về trang chủ</button>
+    </div>
+  </div>
+
+</div><!-- .app -->
+
+<script>
+// ── DATA ──
+const TYPE_LABEL = {
+  who:        "🙋 Tôi là ai?",
+  what_event: "⚡ Chuyện gì?",
+  where:      "📍 Đây là đâu?",
+  what_animal:"🐾 Tôi là con gì?",
+  what_thing: "🔎 Tôi là cái gì?",
+};
+
+const PUZZLES = [
+  { type:"who", answer:"Nô-ê", clues:["Ta sống rất lâu và là người công chính duy nhất trong thế hệ của mình.", "Đức Chúa Trời cảnh báo ta về một cơn lũ lớn và ra lệnh cho ta xây một công trình khổng lồ.", "Ta đóng một chiếc thuyền lớn để cứu gia đình và các loài thú thoát khỏi nước lũ."], choices:["Nô-ê", "Áp-ra-ham", "Mê-tu-sê-la", "Sem", "Hê-nóc"] },
+  { type:"what_event", answer:"Lũ lụt lớn", clues:["Chuyện này xảy ra vì con người đầy tội lỗi và Đức Chúa Trời quyết định thanh tẩy mặt đất.", "Một gia đình tám người và vô số loài thú được cứu thoát nhờ một chiếc thuyền khổng lồ.", "Nước phủ khắp mặt đất trong 40 ngày 40 đêm, rồi Đức Chúa Trời đặt cầu vồng làm dấu hiệu giao ước."], choices:["Lũ lụt lớn", "Tai vạ Ai Cập", "Sự sụp đổ thành Ba-bên", "Cuộc xuất Ai Cập", "Trận chiến Giê-ri-cô"] },
+  { type:"who", answer:"Áp-ra-ham", clues:["Đức Chúa Trời gọi ta rời quê hương để đến một vùng đất Ngài sẽ chỉ cho, dù ta chưa biết đó là đâu.", "Dù ta đã rất già, Đức Chúa Trời hứa ban cho ta một đứa con trai.", "Ta được gọi là 'cha của những kẻ tin' và có con trai tên Y-sác."], choices:["Áp-ra-ham", "Nô-ê", "Lót", "Y-sác", "Gia-cốp"] },
+  { type:"what_thing", answer:"Hòm Giao Ước", clues:["Tôi được làm bằng gỗ si-tim bọc vàng, có hai thiên sứ bằng vàng dang cánh trên nắp.", "Bên trong tôi chứa hai bảng đá ghi Mười Điều Răn, bình đựng ma-na, và cây gậy của A-rôn.", "Tôi là vật thánh nhất của dân Y-sơ-ra-ên — khi tôi được mang đến, tường thành Giê-ri-cô đã sụp đổ."], choices:["Hòm Giao Ước", "Bàn thờ dâng hương", "Chân đèn bảy nhánh", "Bàn bánh trần thiết", "Trụ lửa và mây"] },
+  { type:"where", answer:"Vườn Ê-đen", clues:["Đây là nơi Đức Chúa Trời đặt người đầu tiên Ngài tạo dựng để trồng trọt và giữ gìn.", "Có bốn con sông chảy ra từ nơi này, và giữa vườn có hai cây đặc biệt.", "Đây là nơi xảy ra sự cám dỗ đầu tiên — con rắn, trái cây cấm, và sự sa ngã của loài người."], choices:["Vườn Ê-đen", "Núi Si-nai", "Đất Ca-na-an", "Thành Giê-ru-sa-lem", "Đồng bằng Mê-sô-pô-ta-mi"] },
+  { type:"what_animal", answer:"Con lừa của Ba-la-am", clues:["Tôi là con vật trung thành chở chủ nhân đi trên đường, nhưng hôm đó tôi cứ dừng lại không chịu bước.", "Chủ nhân đánh tôi ba lần vì tức giận, nhưng tôi đang cố bảo vệ ông ấy trước điều ông không nhìn thấy.", "Đức Chúa Trời cho tôi mở miệng nói chuyện với chủ — tôi là con vật duy nhất trong Kinh Thánh làm được điều đó."], choices:["Con lừa của Ba-la-am", "Con cừu của Áp-ra-ham", "Cá nuốt Giô-na", "Chim bồ câu của Nô-ê", "Con rắn trong vườn Ê-đen"] },
+  { type:"who", answer:"Giô-sép", clues:["Cha ta yêu ta nhất và may cho ta một chiếc áo dài sặc sỡ khiến anh em ta ghen tức.", "Ta bị anh em bán cho thương nhân, bị đưa đến Ai Cập và bỏ vào ngục tối.", "Đức Chúa Trời ban cho ta ơn giải mộng, ta trở thành quan tể tướng Ai Cập và cứu gia đình khỏi nạn đói."], choices:["Giô-sép", "Môi-se", "Đa-ni-ên", "Ru-bên", "Bên-gia-min"] },
+  { type:"who", answer:"Môi-se", clues:["Ta được nuôi dưỡng trong cung điện của Pha-ra-ôn như một hoàng tử Ai Cập, nhưng thực ra là người Hê-bơ-rơ.", "Ta gặp Đức Chúa Trời trong bụi gai cháy trên núi và được sai đi giải phóng dân Y-sơ-ra-ên.", "Ta dẫn dắt dân Y-sơ-ra-ên vượt qua Biển Đỏ, thoát khỏi quân của Pha-ra-ôn."], choices:["Môi-se", "A-rôn", "Giô-suê", "Ca-lép", "Giô-sép"] },
+  { type:"what_event", answer:"Xây tháp Ba-bên", clues:["Thuở ấy cả thế gian chỉ nói một thứ tiếng.", "Người ta nung gạch xây một cái tháp chót cao đến tận trời để làm rạng danh mình.", "Đức Chúa Trời làm lộn xộn tiếng nói của họ và khiến mọi người tản ra khắp đất."], choices:["Xây tháp Ba-bên", "Lũ lụt lớn", "Xây đền thờ Giê-ru-sa-lem", "Xây lại tường thành", "Đóng chiếc tàu lớn"] },
+  { type:"who", answer:"Đa-vít", clues:["Ta là con út trong gia đình — không ai nghĩ ta sẽ được Đức Chúa Trời chọn.", "Ta chăn chiên và chơi đàn hạc rất hay, thường hát những bài ca ngợi Đức Chúa Trời.", "Ta dùng một hòn đá và cái ná hạ gục người khổng lồ Gô-li-át trước sự ngỡ ngàng của mọi người."], choices:["Đa-vít", "Sa-mu-ên", "Sau-lơ", "Giô-na-than", "Sa-lô-môn"] },
+  { type:"what_thing", answer:"Chiếc tàu của Nô-ê", clues:["Tôi được đóng bằng gỗ gô-phe, trét chai bề trong lẫn bề ngoài.", "Tôi dài ba trăm thước, có ba từng và một cửa nơi hông.", "Tôi chở tám người cùng các loài thú vượt qua cơn nước lụt."], choices:["Chiếc tàu của Nô-ê", "Hòm Giao Ước", "Thuyền của Phi-e-rơ", "Cái rương mây của Môi-se", "Đền tạm"] },
+  { type:"where", answer:"Núi A-ra-rát", clues:["Suốt nhiều tháng, quanh ta chỉ thấy toàn nước mênh mông.", "Một chiếc tàu khổng lồ đã tấp lên trên ta khi nước bắt đầu rút.", "Nô-ê cùng gia đình ra khỏi tàu và lập một bàn thờ gần nơi ta."], choices:["Núi A-ra-rát", "Núi Si-na-i", "Núi Cạt-mên", "Núi Nê-bô", "Núi Ô-li-ve"] },
+  { type:"who", answer:"Đa-ni-ên", clues:["Ta bị bắt từ Giu-đa sang Ba-by-lôn khi còn trẻ và được đào tạo để phục vụ trong cung vua.", "Ta từ chối ăn thức ăn của vua, chỉ ăn rau quả, nhưng vẫn khoẻ mạnh và thông minh hơn người khác.", "Ta bị ném vào hang sư tử vì không chịu ngừng cầu nguyện Đức Chúa Trời, nhưng sư tử không hại được ta."], choices:["Đa-ni-ên", "Giô-sép", "Sa-đơ-rắc", "A-bết-Nê-gô", "Ê-xê-chi-ên"] },
+  { type:"what_animal", answer:"Con rắn trong vườn Ê-đen", clues:["Tôi quỷ quyệt hơn mọi loài thú đồng.", "Tôi hỏi người nữ: 'Mà chi! Đức Chúa Trời há có phán dặn vậy sao?'", "Vì gạt Ê-va ăn trái cấm, tôi bị rủa phải bò bằng bụng và ăn bụi đất."], choices:["Con rắn trong vườn Ê-đen", "Con lừa của Ba-la-am", "Con sư tử", "Con cáo", "Con dê"] },
+  { type:"who", answer:"Giô-na", clues:["Đức Chúa Trời sai ta đến thành Ni-ni-ve, nhưng ta sợ hãi và chạy trốn đi hướng ngược lại.", "Giữa cơn bão lớn trên biển, ta tự nói với các thuỷ thủ rằng hãy ném ta xuống biển.", "Ta ở trong bụng cá lớn ba ngày ba đêm, cầu nguyện, rồi được nhả lên bờ."], choices:["Giô-na", "Ê-li", "Ê-li-sê", "Giê-rê-mi", "Mi-chê"] },
+  { type:"what_event", answer:"Mười tai vạ tại Ê-díp-tô", clues:["Một vị vua cứng lòng nhất định không cho dân Đức Chúa Trời ra đi.", "Nước sông hoá huyết, ếch nhái, mưa đá và sự tối tăm lần lượt giáng xuống cả xứ.", "Sau tai vạ thứ mười, Pha-ra-ôn đành để dân Y-sơ-ra-ên rời khỏi Ê-díp-tô."], choices:["Mười tai vạ tại Ê-díp-tô", "Vượt Biển Đỏ", "Lũ lụt lớn", "Cơn đói kém lớn", "Tường Giê-ri-cô sụp đổ"] },
+  { type:"who", answer:"Ê-li", clues:["Ta là tiên tri sống dưới thời vua A-háp và hoàng hậu Giê-sa-bên hung ác.", "Ta thách 450 tiên tri của Ba-anh trên núi Cạt-mên — lửa từ trời xuống đốt của lễ của ta ngay tức thì.", "Ta được Đức Chúa Trời đưa lên trời bằng xe lửa và ngựa lửa mà không qua cái chết."], choices:["Ê-li", "Ê-li-sê", "Giô-na", "Giê-rê-mi", "Ê-sai"] },
+  { type:"what_thing", answer:"Cầu vồng", clues:["Tôi xuất hiện trên đám mây sau cơn mưa.", "Đức Chúa Trời đặt tôi làm dấu hiệu sau cơn nước lụt.", "Tôi là dấu của lời hứa rằng nước lụt sẽ không bao giờ huỷ diệt đất nữa."], choices:["Cầu vồng", "Trụ mây", "Ngôi sao Đông phương", "Tia chớp", "Đám mây trên núi"] },
+  { type:"where", answer:"Thành Sô-đôm", clues:["Lót chọn về ở vùng đồng bằng tươi tốt gần nơi này.", "Hai thiên sứ đến giục gia đình Lót mau rời khỏi đây.", "Lửa và diêm sinh từ trời đổ xuống thiêu huỷ ta; vợ Lót ngoảnh lại và hoá thành tượng muối."], choices:["Thành Sô-đôm", "Thành Ni-ni-ve", "Ba-by-lôn", "Thành Giê-ri-cô", "Bê-tên"] },
+  { type:"who", answer:"Sa-mu-ên", clues:["Mẹ ta là An-ne, đã khóc lóc và cầu nguyện tha thiết xin Đức Chúa Trời ban cho bà một đứa con trai.", "Khi ta còn nhỏ phục vụ trong đền thờ, Đức Chúa Trời gọi tên ta ba lần trong đêm.", "Ta là tiên tri và quan xét cuối cùng của Y-sơ-ra-ên, đã xức dầu cho cả vua Sau-lơ lẫn vua Đa-vít."], choices:["Sa-mu-ên", "Ê-li", "Ê-li-sê", "Ghi-đê-ôn", "Giô-suê"] },
+  { type:"what_animal", answer:"Chim bồ câu của Nô-ê", clues:["Tôi được thả ra từ cửa sổ một chiếc tàu lớn.", "Lần đầu tôi bay trở về vì chưa tìm được chỗ đậu chân.", "Lần sau tôi ngậm về một lá ô-li-ve tươi — dấu hiệu nước đã rút."], choices:["Chim bồ câu của Nô-ê", "Con quạ", "Chim sẻ", "Chim cút", "Chim ưng"] },
+  { type:"who", answer:"Giô-suê", clues:["Ta là người phụ tá trung thành của Môi-se trong suốt 40 năm đi trong đồng vắng.", "Ta là một trong hai thám tử (cùng Ca-lép) dám tin rằng dân Y-sơ-ra-ên có thể chiếm được đất Ca-na-an.", "Ta lãnh đạo dân Y-sơ-ra-ên vào Đất Hứa và tường thành Giê-ri-cô sụp đổ khi dân ta đi vòng quanh và thổi kèn."], choices:["Giô-suê", "Ca-lép", "Sa-mu-ên", "Ghi-đê-ôn", "Ba-rắc"] },
+  { type:"what_event", answer:"Vượt Biển Đỏ", clues:["Phía trước là biển, phía sau là đại quân đuổi theo — dân sự kêu la sợ hãi.", "Một người giơ cây gậy ra trên biển, và Đức Chúa Trời khiến gió đông thổi suốt đêm.", "Nước rẽ làm đôi, dân Y-sơ-ra-ên đi ngang qua như trên đất khô."], choices:["Vượt Biển Đỏ", "Vượt sông Giô-đanh", "Mười tai vạ tại Ê-díp-tô", "Lũ lụt lớn", "Tường Giê-ri-cô sụp đổ"] },
+  { type:"who", answer:"Ghi-đê-ôn", clues:["Thiên sứ tìm thấy ta đang đập lúa trong hầm rượu để trốn quân thù và gọi ta là 'dũng sĩ'.", "Ta đặt bộ lông chiên trên đất hai lần để thử chắc chắn rằng Đức Chúa Trời đang dùng ta.", "Ta chỉ dùng 300 người với đèn đuốc và bình đất đánh tan hàng vạn quân Ma-đi-an trong một đêm."], choices:["Ghi-đê-ôn", "Sa-mu-ên", "Giô-suê", "Sim-sôn", "Ba-rắc"] },
+  { type:"what_thing", answer:"Chiếc áo dài sặc sỡ", clues:["Một người cha may tôi để tặng đứa con trai ông yêu nhất.", "Vì tôi mà mười người anh sinh lòng ghen ghét với em mình.", "Tôi bị nhúng vào huyết dê đực để gạt Gia-cốp rằng Giô-sép đã chết."], choices:["Chiếc áo dài sặc sỡ", "Áo choàng của Ê-li", "Áo lông lạc đà", "Áo ê-phót", "Áo của thầy tế lễ"] },
+  { type:"where", answer:"Xứ Ê-díp-tô", clues:["Khi đói kém, các con trai Gia-cốp xuống đây để mua lúa.", "Dân Y-sơ-ra-ên làm nô lệ tại đây trong nhiều trăm năm.", "Mười tai vạ giáng xuống xứ này trước khi Pha-ra-ôn chịu để dân Chúa ra đi."], choices:["Xứ Ê-díp-tô", "Xứ Ca-na-an", "Ba-by-lôn", "Xứ Ma-đi-an", "Xứ Sy-ri"] },
+  { type:"who", answer:"Sim-sôn", clues:["Ta được thánh hiến cho Đức Chúa Trời từ khi còn trong bụng mẹ và không được phép cắt tóc.", "Ta có sức mạnh phi thường — từng xé xác sư tử bằng tay không và đánh hạ hàng ngàn kẻ thù một mình.", "Đa-li-la cắt tóc ta khi ta ngủ, ta mất sức lực và bị quân Phi-li-tin bắt móc hai mắt."], choices:["Sim-sôn", "Ghi-đê-ôn", "Sau-lơ", "Ba-rắc", "Giép-thê"] },
+  { type:"who", answer:"Ru-tơ", clues:["Ta là người Mô-áp — không cùng dân tộc với chồng ta đã mất.", "Ta quyết không rời mẹ chồng Na-ô-mi và nói: 'Bà đi đâu tôi sẽ đi đó, dân của bà sẽ là dân của tôi.'", "Ta mót lúa trên đồng của Bô-ô và sau đó trở thành vợ của ông ấy."], choices:["Ru-tơ", "Ê-xơ-tê", "Ra-háp", "Đê-bô-ra", "Na-ô-mi"] },
+  { type:"what_event", answer:"Ban Mười Điều Răn", clues:["Cả ngọn núi bốc khói, có sấm vang chớp nhoáng và tiếng kèn rất vang động.", "Một người ở trên núi với Đức Chúa Trời suốt bốn mươi ngày đêm.", "Đức Chúa Trời ban cho Môi-se hai bảng đá ghi luật pháp trên núi Si-na-i."], choices:["Ban Mười Điều Răn", "Dựng đền tạm", "Vượt Biển Đỏ", "Ma-na từ trời rơi xuống", "Bụi gai cháy"] },
+  { type:"what_animal", answer:"Con quạ nuôi Ê-li", clues:["Chúng tôi là loài chim lông đen, thường chẳng ai trông mong điều tốt.", "Đức Chúa Trời sai chúng tôi làm một việc lạ lùng bên khe Kê-rít.", "Mỗi sáng và chiều, chúng tôi tha bánh và thịt đến nuôi tiên tri Ê-li."], choices:["Con quạ nuôi Ê-li", "Chim bồ câu", "Chim cút", "Chim sẻ", "Chim ưng"] },
+  { type:"who", answer:"Ê-xơ-tê", clues:["Ta là người Do Thái sống ở Ba Tư, được người anh họ Mạc-đô-chê nuôi dưỡng và dặn giữ bí mật thân phận.", "Ta được chọn làm hoàng hậu của vua A-suê-ru sau một cuộc tuyển chọn khắp vương quốc.", "Ta liều mạng vào gặp vua không được mời để cứu dân Do Thái khỏi kế hoạch tiêu diệt của Ha-man."], choices:["Ê-xơ-tê", "Ru-tơ", "Đê-bô-ra", "Ra-háp", "Ma-ri"] },
+  { type:"what_thing", answer:"Cây gậy của Môi-se", clues:["Tôi từng hoá thành con rắn rồi trở lại như cũ trước mặt Pha-ra-ôn.", "Tôi được giơ ra trên biển và nước rẽ làm đôi.", "Tôi đập vào hòn đá tại Hô-rếp và nước chảy ra cho dân sự uống."], choices:["Cây gậy của Môi-se", "Cây gậy của A-rôn", "Cái trành của Đa-vít", "Cây giáo của Gô-li-át", "Cây gậy của Gia-cốp"] },
+  { type:"where", answer:"Núi Si-na-i", clues:["Môi-se từng thấy bụi gai cháy mà không tàn ở gần nơi ta.", "Cả mình ta bốc khói và rung động khi Đức Chúa Trời ngự xuống.", "Tại đây Môi-se nhận hai bảng đá ghi Mười Điều Răn."], choices:["Núi Si-na-i", "Núi A-ra-rát", "Núi Cạt-mên", "Núi Nê-bô", "Núi Ô-li-ve"] },
+  { type:"who", answer:"Sa-ra", clues:["Khi thiên sứ đến thăm và hứa rằng ta sẽ sinh con trai, ta cười thầm vì không tin nổi.", "Ta đã 90 tuổi khi sinh con — điều mà người thường cho là hoàn toàn không thể xảy ra.", "Ta là vợ của Áp-ra-ham và là mẹ của Y-sác — con trai của lời hứa."], choices:["Sa-ra", "Ra-chên", "Rê-bê-ca", "Hà-ga", "Na-ô-mi"] },
+  { type:"what_event", answer:"Tường Giê-ri-cô sụp đổ", clues:["Cả đạo quân không đánh trận mà chỉ im lặng đi vòng quanh một cái thành.", "Họ đi mỗi ngày một vòng suốt sáu ngày, có khiêng Hòm Giao Ước theo.", "Ngày thứ bảy, sau bảy vòng, kèn thổi vang, dân sự reo lên và tường thành đổ sập."], choices:["Tường Giê-ri-cô sụp đổ", "Vượt sông Giô-đanh", "Trận đánh thành A-hi", "Vượt Biển Đỏ", "Xây lại tường Giê-ru-sa-lem"] },
+  { type:"who", answer:"Phi-e-rơ", clues:["Ta là một ngư dân ở biển hồ Ga-li-lê trước khi Chúa Giê-su gọi ta đi theo Ngài.", "Ta bước xuống thuyền và đi trên mặt nước để đến cùng Chúa, nhưng hoảng sợ và bắt đầu chìm.", "Ta chối không biết Chúa Giê-su ba lần trong một đêm, rồi nghe gà gáy và ra ngoài khóc lóc."], choices:["Phi-e-rơ", "Giăng", "Gia-cơ", "An-rê", "Phi-líp"] },
+  { type:"who", answer:"Phao-lô", clues:["Ta từng bắt bớ và hãm hại những người theo Đấng Christ, tin rằng mình đang làm đúng.", "Trên đường đến Đa-mách, ta bị ánh sáng chói lọi quật ngã và nghe tiếng Chúa Giê-su phán với ta.", "Sau khi tin Chúa, ta đi truyền giáo khắp nơi và viết nhiều thư trong Tân Ước."], choices:["Phao-lô", "Ba-na-ba", "Ti-mô-thê", "Si-la", "Ê-tiên"] },
+  { type:"what_animal", answer:"Con cá lớn nuốt Giô-na", clues:["Đức Chúa Trời sắm sẵn tôi giữa biển trong cơn bão lớn.", "Tôi nuốt một người vừa bị ném xuống biển.", "Sau ba ngày ba đêm, tôi nhả Giô-na ra trên đất khô."], choices:["Con cá lớn nuốt Giô-na", "Cá có đồng tiền trong miệng", "Bầy cá ở Ga-li-lê", "Lê-vi-a-than", "Cá ở ao Bê-tết-đa"] },
+  { type:"who", answer:"Giăng Báp-tít", clues:["Ta sống trong đồng vắng, mặc áo lông lạc đà, ăn châu chấu và mật ong rừng.", "Ta rao giảng bên bờ sông Giô-đanh, kêu gọi mọi người ăn năn và dọn đường cho Đấng sắp đến.", "Ta làm báp-têm cho Chúa Giê-su và thấy Thánh Linh ngự xuống như chim bồ câu."], choices:["Giăng Báp-tít", "Ê-li", "Giê-rê-mi", "Xa-cha-ri", "Giăng sứ đồ"] },
+  { type:"what_thing", answer:"Hai bảng đá Mười Điều Răn", clues:["Chữ trên tôi do chính ngón tay Đức Chúa Trời viết ra.", "Môi-se ném bể tôi khi thấy dân sự thờ bò con vàng, rồi phải đục lại lần thứ hai.", "Tôi ghi Mười Điều Răn và được để trong Hòm Giao Ước."], choices:["Hai bảng đá Mười Điều Răn", "Cuộn sách luật pháp", "Bình đựng ma-na", "Cây gậy của A-rôn", "Hòm Giao Ước"] },
+  { type:"where", answer:"Đồng vắng", clues:["Dân Y-sơ-ra-ên đi lang thang nơi đây suốt bốn mươi năm.", "Mỗi buổi sáng có bánh từ trời rơi xuống nuôi họ tại đây.", "Suốt hành trình dài nơi đây, áo xống họ không sờn rách, chân không sưng phù."], choices:["Đồng vắng", "Xứ Ê-díp-tô", "Xứ Ca-na-an", "Đồng bằng Giê-ri-cô", "Xứ Ma-đi-an"] },
+  { type:"what_event", answer:"Đa-vít thắng Gô-li-át", clues:["Suốt bốn mươi ngày, một người khổng lồ ra thách thức khiến cả đạo binh run sợ.", "Một chàng chăn chiên đi thăm các anh, nghe lời thách thức và xin ra đánh.", "Chỉ với cái trành ném đá, chàng hạ người khổng lồ bằng một hòn đá duy nhất."], choices:["Đa-vít thắng Gô-li-át", "Ghi-đê-ôn thắng Ma-đi-an", "Giô-suê chiếm Giê-ri-cô", "Sim-sôn xô đổ đền thờ", "Sau-lơ thắng dân Am-môn"] },
+  { type:"who", answer:"Nê-hê-mi", clues:["Ta là quan tửu chánh của vua Ba Tư — công việc là mang rượu dâng lên vua mỗi ngày.", "Ta nghe tin tường thành Giê-ru-sa-lem đổ nát, ta khóc lóc và ăn chay nhiều ngày để cầu nguyện.", "Ta trở về Giê-ru-sa-lem lãnh đạo dân chúng xây lại tường thành hoàn toàn chỉ trong 52 ngày."], choices:["Nê-hê-mi", "Ê-xơ-ra", "Đa-ni-ên", "Xa-ru-ba-bên", "Mạc-đô-chê"] },
+  { type:"who", answer:"A-đam", clues:["Ta là người đầu tiên Đức Chúa Trời tạo dựng — Ngài nặn ta từ bụi đất và thổi hơi thở sống vào.", "Đức Chúa Trời đặt ta vào vườn Ê-đen và giao cho ta đặt tên tất cả các loài thú.", "Ta ăn trái cây cấm mà vợ đưa cho, và bị đuổi ra khỏi vườn Ê-đen."], choices:["A-đam", "Ca-in", "A-bên", "Sết", "Hê-nóc"] },
+  { type:"who", answer:"Ê-va", clues:["Ta được tạo nên cách đặc biệt — không phải từ bụi đất như người kia.", "Ta nghe lời con rắn và ăn trái cây mà Đức Chúa Trời đã cấm.", "Ta là người nữ đầu tiên, vợ của A-đam và là mẹ của cả loài người."], choices:["Ê-va", "Sa-ra", "Rê-bê-ca", "Ra-chên", "An-ne"] },
+  { type:"what_animal", answer:"Bầy sư tử trong hang", clues:["Chúng tôi đói và hung dữ, bị nhốt trong một cái hang ở Ba-by-lôn.", "Một người bị ném xuống ở cùng chúng tôi trọn một đêm.", "Thiên sứ bịt miệng chúng tôi, nên Đa-ni-ên không hề hấn gì."], choices:["Bầy sư tử trong hang", "Con gấu", "Con beo", "Con muông sói", "Con rắn"] },
+  { type:"what_thing", answer:"Ma-na", clues:["Tôi rơi xuống cùng sương móc mỗi buổi sáng, trừ ngày Sa-bát.", "Tôi tròn nhỏ như hột ngò, sắc trắng, mùi như bánh ngọt pha mật ong.", "Dân Y-sơ-ra-ên ăn tôi suốt bốn mươi năm trong đồng vắng."], choices:["Ma-na", "Chim cút", "Bánh không men", "Bánh trần thiết", "Mật ong rừng"] },
+  { type:"where", answer:"Sông Giô-đanh", clues:["Dân Y-sơ-ra-ên khiêng Hòm Giao Ước đi ngang qua ta như trên đất khô.", "Na-a-man tắm mình bảy lần trong dòng nước của ta và được sạch bệnh.", "Giăng Báp-tít làm báp-têm cho Chúa Giê-su trong dòng nước của ta."], choices:["Sông Giô-đanh", "Biển Đỏ", "Sông Ơ-phơ-rát", "Biển Ga-li-lê", "Ao Si-lô-ê"] },
+  { type:"what_event", answer:"Lửa từ trời trên núi Cạt-mên", clues:["Hai bàn thờ được lập nên để xem ai là Đức Chúa Trời có thật.", "Bốn trăm năm mươi tiên tri kêu cầu suốt ngày, nhảy nhót, nhưng chẳng có tiếng đáp.", "Ê-li cầu nguyện, lửa từ trời giáng xuống thiêu của lễ dù đã bị đổ nước ba lần."], choices:["Lửa từ trời trên núi Cạt-mên", "Bụi gai cháy", "Ê-li được cất lên trời", "Ba bạn trong lò lửa hực", "Lễ Ngũ tuần"] },
+  { type:"who", answer:"Y-sác", clues:["Cha mẹ ta đều rất già khi sinh ra ta — tên ta có nghĩa là 'cười'.", "Ta theo cha lên núi dâng của lễ, và Đức Chúa Trời sắm sẵn một chiên đực thế chỗ ta.", "Cha ta là Áp-ra-ham, vợ ta là Rê-bê-ca, và ta có hai con trai sinh đôi."], choices:["Y-sác", "Ích-ma-ên", "Gia-cốp", "Ê-sau", "Lót"] },
+  { type:"who", answer:"Gia-cốp", clues:["Ta nắm gót chân anh sinh đôi của mình khi chào đời.", "Ta chiêm bao thấy một cái thang bắc từ đất lên trời, có thiên sứ lên xuống.", "Ta vật lộn với một người suốt đêm và được đổi tên thành Y-sơ-ra-ên."], choices:["Gia-cốp", "Ê-sau", "Y-sác", "Giô-sép", "La-ban"] },
+  { type:"who", answer:"Ê-sau", clues:["Ta là thợ săn giỏi, mình đầy lông, được cha yêu thích.", "Ta đổi quyền trưởng nam cho em mình chỉ vì một bát canh phạn đậu.", "Ta là anh sinh đôi của Gia-cốp, con trai của Y-sác."], choices:["Ê-sau", "Gia-cốp", "Ru-bên", "Ích-ma-ên", "La-ban"] },
+  { type:"what_event", answer:"Ba bạn trong lò lửa hực", clues:["Ba chàng trai không chịu quỳ lạy pho tượng vàng của vua.", "Vua nổi giận truyền đốt lò lửa nóng gấp bảy lần hơn.", "Người ta thấy bốn người đi lại giữa lò — và ba bạn ra khỏi không sém một sợi tóc."], choices:["Ba bạn trong lò lửa hực", "Đa-ni-ên trong hang sư tử", "Lửa trên núi Cạt-mên", "Mười tai vạ tại Ê-díp-tô", "Giô-na trong bụng cá"] },
+  { type:"what_thing", answer:"Con rắn bằng đồng", clues:["Môi-se làm ra tôi theo lệnh Đức Chúa Trời khi dân sự bị rắn lửa cắn.", "Tôi được treo lên một cây sào cao giữa trại quân.", "Ai bị rắn cắn mà nhìn lên tôi thì được sống."], choices:["Con rắn bằng đồng", "Bò con vàng", "Hòm Giao Ước", "Chân đèn bảy nhánh", "Bàn thờ bằng đá"] },
+  { type:"where", answer:"Thành Giê-ri-cô", clues:["Ta là thành có tường cao kiên cố, cửa đóng chặt vì sợ dân Y-sơ-ra-ên.", "Ra-háp sống trong một ngôi nhà trên vách thành của ta.", "Tường của ta sụp đổ sau khi dân Chúa đi vòng quanh bảy ngày."], choices:["Thành Giê-ri-cô", "Thành Giê-ru-sa-lem", "Thành A-hi", "Bê-tên", "Hếp-rôn"] },
+  { type:"what_animal", answer:"Con chiên đực mắc trong bụi gai", clues:["Tôi bị mắc sừng trong bụi gai trên một ngọn núi xứ Mô-ri-a.", "Áp-ra-ham thấy tôi đúng lúc thiên sứ ngăn tay ông lại.", "Tôi được dâng làm của lễ thiêu thế cho Y-sác."], choices:["Con chiên đực mắc trong bụi gai", "Con bò con", "Con dê đực", "Chim bồ câu", "Con chiên con"] },
+  { type:"who", answer:"Rê-bê-ca", clues:["Người đầy tớ già gặp ta bên giếng và ta múc nước cho cả mười con lạc đà của ông uống.", "Ta rời gia đình đi thật xa để cưới một người chồng ta chưa từng gặp mặt.", "Ta là vợ của Y-sác và là mẹ của hai anh em sinh đôi Ê-sau và Gia-cốp."], choices:["Rê-bê-ca", "Sa-ra", "Ra-chên", "Lê-a", "Ru-tơ"] },
+  { type:"who", answer:"Mi-ri-am", clues:["Ta đứng xa xa canh chừng em trai ta đang nằm trong cái rương mây thả trên sông.", "Ta nhanh trí mời cho công chúa một người vú nuôi — chính là mẹ ruột của em ta.", "Ta là chị của Môi-se, đã cầm trống cơm hát mừng sau khi vượt Biển Đỏ."], choices:["Mi-ri-am", "An-ne", "Đê-bô-ra", "Ru-tơ", "Ra-háp"] },
+  { type:"who", answer:"A-rôn", clues:["Ta nói thay cho em trai ta vì em ấy nói không trôi chảy.", "Cây gậy của ta trổ hoa và kết trái hạnh nhân để tỏ rằng Đức Chúa Trời chọn ta.", "Ta là anh của Môi-se và là thầy tế lễ thượng phẩm đầu tiên của Y-sơ-ra-ên."], choices:["A-rôn", "Môi-se", "Giô-suê", "Hê-li", "Sa-mu-ên"] },
+  { type:"what_event", answer:"Chúa Giê-su giáng sinh", clues:["Hoàng đế ra chiếu chỉ kiểm tra dân số khiến ai nấy phải về quê quán mình.", "Quán trọ không còn chỗ, nên một con trẻ phải nằm trong máng cỏ.", "Thiên sứ báo tin mừng cho các kẻ chăn chiên: Đấng Cứu Thế đã sinh tại Bết-lê-hem."], choices:["Chúa Giê-su giáng sinh", "Chúa Giê-su chịu báp-têm", "Chúa vào thành Giê-ru-sa-lem", "Chúa Giê-su phục sinh", "Lễ Ngũ tuần"] },
+  { type:"what_thing", answer:"Bộ lông chiên của Ghi-đê-ôn", clues:["Ghi-đê-ôn để tôi trên sân đạp lúa qua một đêm.", "Lần đầu tôi đẫm sương còn đất chung quanh khô ráo.", "Lần sau tôi khô ráo còn đất chung quanh đẫm sương — để Ghi-đê-ôn biết chắc ý Chúa."], choices:["Bộ lông chiên của Ghi-đê-ôn", "Cái bình đất", "Cây đuốc", "Chiếc kèn", "Áo ê-phót"] },
+  { type:"where", answer:"Ba-by-lôn", clues:["Đa-ni-ên và các bạn bị đem đến đây khi còn trẻ tuổi.", "Vua nơi đây dựng pho tượng vàng bắt mọi dân quỳ lạy.", "Dân Giu-đa bị lưu đày tại đây trong bảy mươi năm."], choices:["Ba-by-lôn", "Thành Ni-ni-ve", "Xứ Ê-díp-tô", "Su-sơ", "Xứ A-sy-ri"] },
+  { type:"who", answer:"Ca-lép", clues:["Ta là một trong mười hai thám tử được sai đi do thám xứ Ca-na-an.", "Chỉ có ta và Giô-suê tin rằng Đức Chúa Trời sẽ giúp dân sự chiếm được xứ ấy.", "Khi tám mươi lăm tuổi ta vẫn mạnh khoẻ và xin núi Hếp-rôn làm sản nghiệp."], choices:["Ca-lép", "Giô-suê", "Ghi-đê-ôn", "Ba-rắc", "A-rôn"] },
+  { type:"what_animal", answer:"Con gà trống", clues:["Tiếng gáy của tôi vang lên trong đêm Chúa bị bắt.", "Chúa đã nói trước về tiếng gáy của tôi trong bữa ăn tối.", "Khi tôi gáy, Phi-e-rơ nhớ lại lời Chúa và đi ra ngoài khóc lóc đắng cay."], choices:["Con gà trống", "Chim bồ câu", "Con quạ", "Chim sẻ", "Con lừa"] },
+  { type:"who", answer:"Ra-háp", clues:["Ta sống trong một ngôi nhà ở trên vách thành Giê-ri-cô.", "Ta giấu hai thám tử Y-sơ-ra-ên trên mái nhà, dưới những bó cây gai.", "Ta buộc sợi chỉ điều nơi cửa sổ và cả nhà ta được cứu khi thành sụp đổ."], choices:["Ra-háp", "Ru-tơ", "Đê-bô-ra", "Gia-ên", "Ê-xơ-tê"] },
+  { type:"who", answer:"Đê-bô-ra", clues:["Ta ngồi xét xử dân sự dưới một cây chà là mang tên ta.", "Ta là nữ tiên tri, làm quan xét của Y-sơ-ra-ên thuở ấy.", "Ta cùng Ba-rắc ra trận và hát bài ca chiến thắng quân Si-sê-ra."], choices:["Đê-bô-ra", "Ru-tơ", "Mi-ri-am", "Ê-xơ-tê", "An-ne"] },
+  { type:"what_event", answer:"Chúa Giê-su chịu báp-têm", clues:["Người mặc áo lông lạc đà ban đầu từ chối, nói rằng chính mình mới cần điều đó.", "Khi Ngài vừa lên khỏi nước, các từng trời mở ra.", "Thánh Linh ngự xuống như chim bồ câu, có tiếng phán: 'Này là Con yêu dấu của ta.'"], choices:["Chúa Giê-su chịu báp-têm", "Chúa Giê-su giáng sinh", "Chúa hoá hình trên núi", "Chúa dẹp yên bão tố", "Lễ Ngũ tuần"] },
+  { type:"who", answer:"Bô-ô", clues:["Ta là chủ ruộng giàu có ở Bết-lê-hem.", "Ta dặn thợ gặt cố ý bỏ lại lúa cho một người nữ ngoại quốc nghèo đến mót.", "Ta cưới Ru-tơ người Mô-áp và trở thành ông cố của vua Đa-vít."], choices:["Bô-ô", "Y-sai", "Ê-li-mê-léc", "Ô-bết", "La-ban"] },
+  { type:"what_thing", answer:"Trụ mây và trụ lửa", clues:["Ban ngày tôi là đám mây đi trước dẫn đường cho cả đoàn dân.", "Ban đêm tôi là cột lửa soi sáng cho họ.", "Tôi đứng chắn giữa trại quân Ê-díp-tô và trại Y-sơ-ra-ên trong đêm vượt biển."], choices:["Trụ mây và trụ lửa", "Cầu vồng", "Ngôi sao Đông phương", "Bụi gai cháy", "Lửa trên núi Cạt-mên"] },
+  { type:"where", answer:"Thành Ni-ni-ve", clues:["Ta là thành rất lớn, phải đi ba ngày đường mới hết.", "Một tiên tri không muốn đến với ta nên xuống tàu trốn đi hướng ngược lại.", "Cả thành ta, từ vua đến dân, đều mặc bao gai ăn năn khi nghe Giô-na rao giảng."], choices:["Thành Ni-ni-ve", "Ba-by-lôn", "Thành Sô-đôm", "Ta-rê-si", "Đa-mách"] },
+  { type:"who", answer:"An-ne", clues:["Ta buồn khổ nhiều năm vì không có con và thường bị người khác trêu chọc.", "Ta cầu nguyện thầm trong đền thờ đến nỗi thầy tế lễ tưởng ta say rượu.", "Ta giữ lời hứa dâng con trai Sa-mu-ên cho Đức Chúa Trời, mỗi năm may cho con một cái áo nhỏ."], choices:["An-ne", "Sa-ra", "Rê-bê-ca", "Na-ô-mi", "Ra-chên"] },
+  { type:"what_animal", answer:"Chim cút", clues:["Chúng tôi bay đến phủ đầy trại quân vào buổi chiều.", "Dân Y-sơ-ra-ên thèm thịt, và Đức Chúa Trời sai chúng tôi đến.", "Cùng với ma-na, chúng tôi là thức ăn của dân Chúa trong đồng vắng."], choices:["Chim cút", "Chim bồ câu", "Con quạ", "Chim sẻ", "Châu chấu"] },
+  { type:"what_event", answer:"Hoá bánh cho năm ngàn người", clues:["Đoàn dân đông nghe giảng đến chiều tối thì đói, mà nơi ấy lại vắng vẻ.", "Một em trai trao ra trọn phần ăn nhỏ bé của mình.", "Từ năm cái bánh và hai con cá, hơn năm ngàn người ăn no, còn thừa mười hai giỏ đầy."], choices:["Hoá bánh cho năm ngàn người", "Ma-na từ trời rơi xuống", "Mẻ lưới đầy cá lạ lùng", "Tiệc cưới tại Ca-na", "Bữa ăn tối cuối cùng"] },
+  { type:"who", answer:"Giô-na-than", clues:["Cha ta là vua, nhưng người bạn thân nhất của ta lại là người cha ta muốn giết.", "Ta cởi áo choàng, gươm và cung của mình mà tặng cho bạn.", "Ta dùng mũi tên làm dấu hiệu báo cho Đa-vít chạy trốn khỏi vua Sau-lơ."], choices:["Giô-na-than", "Đa-vít", "Sau-lơ", "Áp-sa-lôm", "Sa-mu-ên"] },
+  { type:"who", answer:"Sa-lô-môn", clues:["Khi Đức Chúa Trời cho ta xin bất cứ điều gì, ta không xin giàu sang mà xin sự khôn ngoan.", "Ta phân xử vụ hai người mẹ tranh giành một em bé khiến cả nước kinh sợ.", "Ta xây đền thờ đầu tiên cho Đức Chúa Trời tại Giê-ru-sa-lem."], choices:["Sa-lô-môn", "Đa-vít", "Rô-bô-am", "Ê-xê-chia", "Giô-si-a"] },
+  { type:"what_thing", answer:"Áo choàng của Ê-li", clues:["Chủ tôi ném tôi đắp trên mình một chàng trai đang cày ruộng.", "Khi chủ tôi được cất lên trời trong cơn gió lốc, tôi rơi ở lại.", "Ê-li-sê dùng tôi đập xuống nước sông Giô-đanh và nước rẽ ra hai bên."], choices:["Áo choàng của Ê-li", "Chiếc áo dài sặc sỡ", "Áo lông lạc đà", "Cây gậy của Môi-se", "Áo ê-phót"] },
+  { type:"where", answer:"Bết-lê-hem", clues:["Ru-tơ đã mót lúa trong đồng ruộng thuộc về ta.", "Ta được gọi là thành Đa-vít, vì vua Đa-vít ra đời tại đây.", "Chúa Giê-su giáng sinh tại ta, đúng như lời tiên tri Mi-chê đã báo trước."], choices:["Bết-lê-hem", "Na-xa-rét", "Giê-ru-sa-lem", "Giê-ri-cô", "Ca-bê-na-um"] },
+  { type:"who", answer:"Ê-li-sê", clues:["Ta đang cày ruộng với mười hai đôi bò thì được gọi đi theo thầy mình.", "Ta xin được bội phần thần linh của thầy trước khi thầy được cất lên trời.", "Ta nhặt áo choàng của Ê-li, đập xuống sông Giô-đanh và nước rẽ ra hai bên."], choices:["Ê-li-sê", "Ê-li", "Ghê-ha-xi", "Giê-hu", "Ê-sai"] },
+  { type:"what_event", answer:"Chúa dẹp yên bão tố", clues:["Chiếc thuyền gặp cơn bão lớn giữa biển hồ, sóng tạt vào gần chìm.", "Các môn đồ hoảng sợ, trong khi Thầy mình vẫn ngủ nơi đằng lái.", "Ngài thức dậy quở gió và biển: 'Hãy êm đi, lặng đi!' — tức thì yên lặng như tờ."], choices:["Chúa dẹp yên bão tố", "Chúa đi bộ trên mặt biển", "Mẻ lưới đầy cá lạ lùng", "Giô-na bị ném xuống biển", "Vượt Biển Đỏ"] },
+  { type:"who", answer:"Na-a-man", clues:["Ta là quan tổng binh dũng cảm của vua Sy-ri nhưng mắc một căn bệnh đáng sợ.", "Một đứa tớ gái nhỏ mách rằng có tiên tri ở Sa-ma-ri chữa được bệnh ta.", "Ta tắm mình bảy lần dưới sông Giô-đanh và da thịt ta lành như da con trẻ nhỏ."], choices:["Na-a-man", "Ghê-ha-xi", "Giê-hu", "Bên-Ha-đát", "U-ri"] },
+  { type:"what_animal", answer:"Con cá có đồng tiền trong miệng", clues:["Phi-e-rơ cần tiền để nộp thuế đền thờ.", "Chúa bảo ông ra biển thả câu và bắt lấy con cá đầu tiên.", "Trong miệng tôi có một đồng bạc, đủ nộp thuế cho hai người."], choices:["Con cá có đồng tiền trong miệng", "Con cá lớn nuốt Giô-na", "Bầy cá ở Ga-li-lê", "Cá ở ao Si-lô-ê", "Con cua"] },
+  { type:"who", answer:"Gióp", clues:["Ta giàu có nhất phương Đông nhưng mất hết mọi sự chỉ trong một ngày.", "Dù chịu khổ và ghẻ chốc khắp mình, ta vẫn không nói phạm đến Đức Chúa Trời.", "Cuối cùng Đức Chúa Trời ban cho ta gấp đôi mọi điều ta từng có."], choices:["Gióp", "Áp-ra-ham", "Lót", "Ê-li-pha", "Nô-ê"] },
+  { type:"what_thing", answer:"Năm cái bánh và hai con cá", clues:["Chúng tôi là phần ăn nhỏ của một em trai trong đoàn dân đông.", "Em ấy trao chúng tôi cho các môn đồ của Chúa Giê-su.", "Sau khi Chúa tạ ơn, chúng tôi hoá ra đủ nuôi hơn năm ngàn người."], choices:["Năm cái bánh và hai con cá", "Ma-na", "Bánh không men", "Bánh trần thiết", "Đồng tiền trong miệng cá"] },
+  { type:"where", answer:"Na-xa-rét", clues:["Thiên sứ Gáp-ri-ên đến gặp Ma-ri tại thành nhỏ này.", "Chúa Giê-su lớn lên tại đây trong nhà người thợ mộc.", "Có người từng hỏi: 'Há có vật gì tốt ra từ nơi này được sao?'"], choices:["Na-xa-rét", "Bết-lê-hem", "Ca-bê-na-um", "Bê-tha-ni", "Giê-ru-sa-lem"] },
+  { type:"who", answer:"Ê-sai", clues:["Ta thấy Chúa ngồi trên ngôi cao sang, có sê-ra-phim kêu rằng: 'Thánh thay, thánh thay, thánh thay.'", "Một sê-ra-phim lấy than lửa đỏ chạm vào môi ta để ta được sạch.", "Ta thưa: 'Có tôi đây; xin hãy sai tôi' và nói trước nhiều điều về Đấng Cứu Thế."], choices:["Ê-sai", "Giê-rê-mi", "Ê-xê-chi-ên", "Ô-sê", "A-mốt"] },
+  { type:"what_event", answer:"Chúa vào thành Giê-ru-sa-lem", clues:["Hai môn đồ được sai đi dắt về một con lừa con chưa ai từng cưỡi.", "Đoàn dân đông trải áo mình và chặt nhánh cây rải trên đường.", "Mọi người cầm nhánh chà là tung hô: 'Hô-sa-na! Chúc tụng Đấng nhân danh Chúa mà đến!'"], choices:["Chúa vào thành Giê-ru-sa-lem", "Chúa Giê-su giáng sinh", "Chúa hoá hình trên núi", "Chúa Giê-su phục sinh", "Lễ Ngũ tuần"] },
+  { type:"who", answer:"Giê-rê-mi", clues:["Đức Chúa Trời gọi ta từ khi ta còn trẻ, dù ta thưa rằng mình chỉ là con trẻ không biết nói.", "Ta bị thả xuống một cái hố bùn vì dám nói sự thật.", "Ta được gọi là tiên tri than khóc vì khóc cho thành Giê-ru-sa-lem."], choices:["Giê-rê-mi", "Ê-sai", "Ê-xê-chi-ên", "Đa-ni-ên", "Giô-na"] },
+  { type:"what_animal", answer:"Con lừa con", clues:["Chưa từng có ai cưỡi trên lưng tôi bao giờ.", "Hai môn đồ mở dây dắt tôi đi, đúng như lời Chúa dặn.", "Chúa Giê-su cưỡi tôi vào thành Giê-ru-sa-lem giữa tiếng tung hô."], choices:["Con lừa con", "Con lừa của Ba-la-am", "Con ngựa", "Con lạc đà", "Con bò"] },
+  { type:"who", answer:"Ma-ri", clues:["Thiên sứ Gáp-ri-ên đến chào ta và báo một tin khiến ta bối rối.", "Ta thưa: 'Tôi đây là tôi tớ Chúa; xin sự ấy xảy ra cho tôi như lời người truyền.'", "Ta sinh Chúa Giê-su và đặt nằm trong máng cỏ tại Bết-lê-hem."], choices:["Ma-ri", "Ê-li-sa-bét", "Ma-thê", "Ma-ri Ma-đơ-len", "An-ne"] },
+  { type:"what_thing", answer:"Máng cỏ", clues:["Tôi vốn là chỗ đựng thức ăn cho súc vật.", "Đêm ấy quán trọ không còn chỗ, nên tôi được dùng làm nôi.", "Hài nhi Giê-su được bọc bằng khăn, nằm trong tôi tại Bết-lê-hem."], choices:["Máng cỏ", "Cái rương mây", "Cái giường", "Bàn ăn", "Cái thúng"] },
+  { type:"where", answer:"Biển Ga-li-lê", clues:["Phi-e-rơ, An-rê, Gia-cơ và Giăng làm nghề chài lưới trên ta.", "Chúa Giê-su từng đi bộ trên mặt nước của ta.", "Ngài đứng trên thuyền quở bão của ta: 'Hãy êm đi, lặng đi!'"], choices:["Biển Ga-li-lê", "Biển Đỏ", "Sông Giô-đanh", "Ao Bê-tết-đa", "Ao Si-lô-ê"] },
+  { type:"who", answer:"Giăng", clues:["Ta và anh ta bỏ thuyền lưới của cha mà theo Chúa Giê-su.", "Ta được gọi là môn đồ Chúa yêu, từng tựa vào ngực Ngài trong bữa ăn cuối.", "Ta viết sách Tin Lành thứ tư và sách Khải Huyền khi bị đày ở đảo Bát-mô."], choices:["Giăng", "Phi-e-rơ", "Gia-cơ", "An-rê", "Ma-thi-ơ"] },
+  { type:"what_event", answer:"Chúa Giê-su phục sinh", clues:["Sáng sớm ngày thứ nhất trong tuần lễ, mấy người nữ đem thuốc thơm ra mộ.", "Hòn đá lớn đã được lăn ra, và ngôi mộ trống không.", "Thiên sứ phán: 'Ngài không ở đây đâu; Ngài sống lại rồi.'"], choices:["Chúa Giê-su phục sinh", "La-xa-rơ sống lại", "Chúa vào thành Giê-ru-sa-lem", "Chúa hoá hình trên núi", "Lễ Ngũ tuần"] },
+  { type:"who", answer:"Ma-thi-ơ", clues:["Người ta không ưa ta vì nghề của ta là thâu thuế cho người Rô-ma.", "Chúa Giê-su đi ngang bàn thâu thuế, phán: 'Hãy theo ta', và ta đứng dậy theo Ngài ngay.", "Ta mở tiệc lớn mời Chúa và viết sách Tin Lành đầu tiên trong Tân Ước."], choices:["Ma-thi-ơ", "Xa-chê", "Lu-ca", "Mác", "Thô-ma"] },
+  { type:"who", answer:"Xa-chê", clues:["Ta giàu có nhờ làm đầu bọn thâu thuế, nhưng chẳng ai trong thành Giê-ri-cô ưa ta.", "Vì thấp bé, ta trèo lên cây sung để nhìn Chúa Giê-su đi ngang qua.", "Chúa gọi đúng tên ta, vào nhà ta, và ta hứa thường bồi gấp tư cho người ta đã lấy quá."], choices:["Xa-chê", "Ma-thi-ơ", "Ni-cô-đem", "Si-môn", "Ba-ti-mê"] },
+  { type:"what_animal", answer:"Châu chấu", clues:["Chúng tôi bay đến đông nghịt, che kín cả mặt đất xứ Ê-díp-tô.", "Chúng tôi ăn sạch những gì trận mưa đá còn chừa lại.", "Chúng tôi là tai vạ thứ tám giáng trên Pha-ra-ôn cứng lòng."], choices:["Châu chấu", "Ếch nhái", "Ruồi mòng", "Rận", "Chim cút"] },
+  { type:"what_thing", answer:"Ngôi sao Đông phương", clues:["Mấy thầy bác sĩ ở Đông phương nhìn thấy tôi và lên đường đi rất xa.", "Tôi đi trước dẫn đường cho họ.", "Tôi dừng lại ngay trên nơi có Con Trẻ Giê-su."], choices:["Ngôi sao Đông phương", "Trụ lửa", "Cầu vồng", "Mặt trời dừng lại", "Ánh sáng trên đường Đa-mách"] },
+  { type:"where", answer:"Thành Giê-ru-sa-lem", clues:["Đa-vít chiếm ta từ dân Giê-bu-sít và đóng đô tại đây.", "Sa-lô-môn xây đền thờ Đức Chúa Trời ở trong ta.", "Chúa Giê-su vào ta giữa tiếng tung hô 'Hô-sa-na' trong tuần lễ cuối của Ngài."], choices:["Thành Giê-ru-sa-lem", "Bết-lê-hem", "Sa-ma-ri", "Thành Giê-ri-cô", "Hếp-rôn"] },
+  { type:"who", answer:"Thô-ma", clues:["Ta là một trong mười hai sứ đồ, từng nói sẵn lòng đi chết cùng Chúa.", "Ta vắng mặt khi Chúa phục sinh hiện ra, nên ta không tin lời anh em thuật lại.", "Khi thấy dấu đinh nơi tay Ngài, ta thưa: 'Lạy Chúa tôi và Đức Chúa Trời tôi!'"], choices:["Thô-ma", "Phi-líp", "An-rê", "Gia-cơ", "Na-tha-na-ên"] },
+  { type:"what_event", answer:"Lễ Ngũ tuần", clues:["Các môn đồ đang nhóm họp một chỗ thì có tiếng như gió thổi ào ào đầy cả nhà.", "Có lưỡi như bằng lửa đậu trên mỗi người, và họ nói được các thứ tiếng khác.", "Phi-e-rơ giảng một bài, và độ ba ngàn người tin Chúa trong ngày ấy."], choices:["Lễ Ngũ tuần", "Chúa Giê-su phục sinh", "Chúa thăng thiên", "Phao-lô gặp Chúa trên đường Đa-mách", "Lễ Vượt qua"] },
+  { type:"who", answer:"La-xa-rơ", clues:["Ta sống ở làng Bê-tha-ni cùng hai chị em là Ma-thê và Ma-ri.", "Khi ta đau nặng rồi qua đời, Chúa Giê-su đã khóc bên mộ ta.", "Ta bước ra khỏi mộ sau bốn ngày, mình còn quấn vải liệm."], choices:["La-xa-rơ", "Ni-cô-đem", "Xa-chê", "Ba-ti-mê", "Si-môn"] },
+];
+
+const POINTS_MAP = [30, 20, 10];
+
+// ── STATE ──
+let state = {
+  mode: 'set',
+  qIndex: 0,
+  totalQ: 5,
+  sessionScore: 120,
+  roundScore: 0,
+  correct: 0,
+  wrong: 0,
+  bestPts: 0,
+  earnedThisSet: 0,
+  clueIdx: 0,
+  usedChoices: new Set(),
+  answered: false,
+  timer: null,
+  timeLeft: 15,
+};
+
+// ── NAVIGATION ──
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  clearInterval(state.timer);
+}
+
+// ── GAME START ──
+function startGame(mode) {
+  state.mode = mode;
+  state.qIndex = 0;
+  state.totalQ = mode === 'set' ? 5 : 999;
+  state.correct = 0;
+  state.wrong = 0;
+  state.bestPts = 0;
+  state.earnedThisSet = 0;
+  loadQuestion();
+  goTo('screenGame');
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function loadQuestion() {
+  const q = PUZZLES[state.qIndex % PUZZLES.length];
+  state.clueIdx = 0;
+  state.usedChoices = new Set();
+  state.answered = false;
+
+  document.getElementById('progressText').textContent =
+    state.mode === 'set' ? `Câu ${state.qIndex + 1} / ${state.totalQ}` : `Câu ${state.qIndex + 1}`;
+  document.getElementById('gameScore').textContent = state.sessionScore;
+
+  q.clues.forEach((c, i) => { document.getElementById('ct' + i).textContent = c; });
+  document.getElementById('clueBoardTitle').textContent = TYPE_LABEL[q.type] || '🙋 Tôi là ai?';
+
+  const shuffled = shuffle(q.choices);
+  state.shuffledChoices = shuffled;
+
+  const answersEl = document.getElementById('answers');
+  answersEl.innerHTML = '';
+  shuffled.forEach((name, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'btn-answer';
+    btn.id = 'c' + i;
+    btn.textContent = name;
+    btn.onclick = () => handleAnswer(name, i);
+    answersEl.appendChild(btn);
+  });
+
+  for (let i = 0; i < 3; i++) document.getElementById('clue' + i).className = 'clue-item hidden';
+  document.getElementById('btnNextClue').classList.remove('show');
+  revealClue(0);
+}
+
+function revealClue(idx) {
+  state.clueIdx = idx;
+  state.answered = false;
+  for (let i = 0; i < 3; i++) {
+    document.getElementById('clue' + i).className = 'clue-item ' + (i < idx ? 'revealed' : i === idx ? 'current' : 'hidden');
+  }
+  document.getElementById('ptsBadge').textContent = `⭐ Đúng lần này: ${POINTS_MAP[idx]} ta-lân`;
+  document.getElementById('btnNextClue').classList.remove('show');
+  const q = PUZZLES[state.qIndex % PUZZLES.length];
+  state.usedChoices.forEach((used) => {
+    // keep grayed
+  });
+  if (state.shuffledChoices) {
+    state.shuffledChoices.forEach((_, i) => {
+      if (!state.usedChoices.has(i)) {
+        const btn = document.getElementById('c' + i);
+        if (btn) { btn.disabled = false; btn.className = 'btn-answer'; }
+      }
+    });
+  }
+  startTimer();
+}
+
+function startTimer() {
+  clearInterval(state.timer);
+  state.timeLeft = 15;
+  // Fix: force reset bar về 100% không có transition
+  // để lần đếm đầu tiên (Gợi ý 1) cũng có animation
+  const bar = document.getElementById('timerBar');
+  bar.style.transition = 'none';
+  bar.style.width = '100%';
+  bar.className = 'timer-bar';
+  document.getElementById('timerNum').textContent = '15';
+  bar.offsetWidth; // force reflow — bắt browser áp dụng style ngay
+  bar.style.transition = ''; // khôi phục transition
+  state.timer = setInterval(() => {
+    state.timeLeft--;
+    updateTimer();
+    if (state.timeLeft <= 0) {
+      clearInterval(state.timer);
+      if (!state.answered) {
+        state.clueIdx < 2 ? document.getElementById('btnNextClue').classList.add('show') : loseQuestion();
+      }
+    }
+  }, 1000);
+}
+
+function updateTimer() {
+  const pct = (state.timeLeft / 15) * 100;
+  const bar = document.getElementById('timerBar');
+  bar.style.width = pct + '%';
+  bar.className = 'timer-bar' + (state.timeLeft <= 5 ? ' warn' : '');
+  document.getElementById('timerNum').textContent = state.timeLeft;
+}
+
+function nextClue() {
+  clearInterval(state.timer);
+  revealClue(state.clueIdx + 1);
+}
+
+function handleAnswer(name, idx) {
+  if (state.answered || state.usedChoices.has(idx)) return;
+  const q = PUZZLES[state.qIndex % PUZZLES.length];
+  state.answered = true;
+  clearInterval(state.timer);
+  const btn = document.getElementById('c' + idx);
+
+  if (name === q.answer) {
+    btn.className = 'btn-answer correct';
+    state.shuffledChoices.forEach((_, i) => { if (i !== idx) { const b = document.getElementById('c'+i); if(b) b.disabled = true; }});
+    const pts = POINTS_MAP[state.clueIdx];
+    state.roundScore = pts;
+    state.sessionScore += pts;
+    state.earnedThisSet += pts;
+    state.correct++;
+    if (pts > state.bestPts) state.bestPts = pts;
+    setTimeout(() => showResult(true, q.answer), 600);
+  } else {
+    state.usedChoices.add(idx);
+    btn.className = 'btn-answer wrong';
+    btn.disabled = true;
+    if (state.clueIdx < 2) {
+      document.getElementById('btnNextClue').classList.add('show');
+    } else {
+      setTimeout(() => loseQuestion(), 400);
+    }
+  }
+}
+
+function loseQuestion() {
+  const q = PUZZLES[state.qIndex % PUZZLES.length];
+  state.shuffledChoices.forEach((name, i) => {
+    const btn = document.getElementById('c' + i);
+    if (btn) {
+      btn.disabled = true;
+      if (name === q.answer) btn.className = 'btn-answer reveal-correct';
+    }
+  });
+  state.wrong++;
+  state.roundScore = 0;
+  setTimeout(() => showResult(false, q.answer), 700);
+}
+
+function showResult(won, charName) {
+  document.getElementById('resIcon').textContent = won ? '🏆' : '😔';
+  document.getElementById('resTitle').textContent = won ? 'Đúng rồi!' : 'Chưa đoán được';
+  document.getElementById('resSub').textContent = won
+    ? (state.clueIdx === 0 ? 'Đoán ngay gợi ý đầu tiên!' : state.clueIdx === 1 ? 'Đoán được ở gợi ý thứ hai.' : 'Đoán được ở gợi ý cuối.')
+    : 'Thử lại lần sau nhé!';
+  document.getElementById('resChar').innerHTML = `Nhân vật: <strong>${charName}</strong>`;
+  document.getElementById('resPts').textContent = won ? `+${state.roundScore}` : '+0';
+  document.getElementById('gameScore').textContent = state.sessionScore;
+
+  const isLast = state.mode === 'set' && state.qIndex >= state.totalQ - 1;
+  document.getElementById('btnNextQ').textContent = isLast ? '📊 Xem kết quả' : 'Câu tiếp theo →';
+
+  goTo('screenResult');
+}
+
+function nextQuestion() {
+  state.qIndex++;
+  if (state.mode === 'set' && state.qIndex >= state.totalQ) {
+    showSetEnd();
+  } else {
+    loadQuestion();
+    goTo('screenGame');
+  }
+}
+
+function showSetEnd() {
+  document.getElementById('statCorrect').textContent = state.correct;
+  document.getElementById('statWrong').textContent = state.wrong;
+  document.getElementById('statBest').textContent = state.bestPts;
+  document.getElementById('statTotal').textContent = state.earnedThisSet;
+  document.getElementById('homeTalan').textContent = state.sessionScore;
+  goTo('screenSetEnd');
+}
+</script>
+</body>
+</html>
