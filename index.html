@@ -1197,25 +1197,31 @@ function revealClue(idx) {
 function startTimer() {
   clearInterval(state.timer);
   state.timeLeft = 15;
-  // Fix: force reset bar về 100% không có transition
-  // để lần đếm đầu tiên (Gợi ý 1) cũng có animation
   const bar = document.getElementById('timerBar');
-  bar.style.transition = 'none';
-  bar.style.width = '100%';
-  bar.className = 'timer-bar';
-  document.getElementById('timerNum').textContent = '15';
-  bar.offsetWidth; // force reflow — bắt browser áp dụng style ngay
-  bar.style.transition = ''; // khôi phục transition
-  state.timer = setInterval(() => {
-    state.timeLeft--;
-    updateTimer();
-    if (state.timeLeft <= 0) {
-      clearInterval(state.timer);
-      if (!state.answered) {
-        state.clueIdx < 2 ? document.getElementById('btnNextClue').classList.add('show') : loseQuestion();
+  // Dùng requestAnimationFrame để đảm bảo DOM đã render xong trước khi chạy animation
+  requestAnimationFrame(() => {
+    bar.style.transition = 'none';
+    bar.style.width = '100%';
+    bar.className = 'timer-bar';
+    document.getElementById('timerNum').textContent = '15';
+    bar.offsetWidth; // force reflow
+    bar.style.transition = '';
+    state.timer = setInterval(() => {
+      state.timeLeft--;
+      updateTimer();
+      if (state.timeLeft <= 0) {
+        clearInterval(state.timer);
+        if (!state.answered) {
+          // Tự động chuyển gợi ý tiếp theo, không cần bấm nút
+          if (state.clueIdx < 2) {
+            revealClue(state.clueIdx + 1);
+          } else {
+            loseQuestion();
+          }
+        }
       }
-    }
-  }, 1000);
+    }, 1000);
+  });
 }
 
 function updateTimer() {
@@ -1252,8 +1258,11 @@ function handleAnswer(name, idx) {
     state.usedChoices.add(idx);
     btn.className = 'btn-answer wrong';
     btn.disabled = true;
+    state.answered = false; // cho phép tiếp tục đoán
     if (state.clueIdx < 2) {
-      document.getElementById('btnNextClue').classList.add('show');
+      // Tự động chuyển sang gợi ý tiếp sau 0.8s
+      clearInterval(state.timer);
+      setTimeout(() => revealClue(state.clueIdx + 1), 800);
     } else {
       setTimeout(() => loseQuestion(), 400);
     }
