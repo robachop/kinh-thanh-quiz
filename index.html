@@ -326,9 +326,10 @@ body {
       </div>
     </div>
 
-    <div class="points-badge" id="ptsBadge">⭐ Đúng lần này: 30 ta-lân</div>
-    <div class="answers" id="answers"></div>
+    <div class="points-badge" id="ptsBadge" style="display:none">⭐ Đúng lần này: 30 ta-lân</div>
+    <div class="answers" id="answers" style="display:none"></div>
     <button class="btn-next-clue" id="btnNextClue" onclick="nextClue()">Xem gợi ý tiếp →</button>
+    <button class="btn-primary" id="btnStart" onclick="beginQuestion()" style="margin-top:20px;width:100%;display:none">▶ Bắt đầu</button>
   </div>
 
   <!-- ══ SCREEN 4: KẾT QUẢ CÂU ══ -->
@@ -1166,8 +1167,25 @@ function loadQuestion() {
     answersEl.appendChild(btn);
   });
 
+  // Ẩn tất cả, hiện nút Bắt đầu
   for (let i = 0; i < 3; i++) document.getElementById('clue' + i).className = 'clue-item hidden';
   document.getElementById('btnNextClue').classList.remove('show');
+  document.getElementById('ptsBadge').style.display = 'none';
+  document.getElementById('answers').style.display = 'none';
+  document.getElementById('btnStart').style.display = 'block';
+  // Reset timer bar về trạng thái ban đầu
+  const bar = document.getElementById('timerBar');
+  bar.style.transition = 'none';
+  bar.style.width = '100%';
+  bar.className = 'timer-bar';
+  document.getElementById('timerNum').textContent = '–';
+  clearInterval(state.timer);
+}
+
+function beginQuestion() {
+  document.getElementById('btnStart').style.display = 'none';
+  document.getElementById('ptsBadge').style.display = '';
+  document.getElementById('answers').style.display = '';
   revealClue(0);
 }
 
