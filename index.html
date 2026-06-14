@@ -1186,7 +1186,17 @@ function beginQuestion() {
   document.getElementById('btnStart').style.display = 'none';
   document.getElementById('ptsBadge').style.display = '';
   document.getElementById('answers').style.display = '';
-  revealClue(0);
+  // Giống trang 2 và 3: hiện nút Gợi ý, gợi ý 1 vẫn ẩn
+  state.clueIdx = -1;
+  showClueButton(0);
+}
+
+function showClueButton(nextIdx) {
+  const btn = document.getElementById('btnNextClue');
+  btn.textContent = `💡 Xem gợi ý ${nextIdx + 1}/3`;
+  btn.classList.add('show');
+  // Cập nhật badge điểm tiềm năng
+  document.getElementById('ptsBadge').textContent = `⭐ Đúng lần này: ${POINTS_MAP[nextIdx]} ta-lân`;
 }
 
 function revealClue(idx) {
@@ -1230,9 +1240,9 @@ function startTimer() {
       if (state.timeLeft <= 0) {
         clearInterval(state.timer);
         if (!state.answered) {
-          // Tự động chuyển gợi ý tiếp theo, không cần bấm nút
+          // Hiện nút gợi ý tiếp (không tự chuyển)
           if (state.clueIdx < 2) {
-            revealClue(state.clueIdx + 1);
+            showClueButton(state.clueIdx + 1);
           } else {
             loseQuestion();
           }
@@ -1252,6 +1262,7 @@ function updateTimer() {
 
 function nextClue() {
   clearInterval(state.timer);
+  document.getElementById('btnNextClue').classList.remove('show');
   revealClue(state.clueIdx + 1);
 }
 
@@ -1278,9 +1289,9 @@ function handleAnswer(name, idx) {
     btn.disabled = true;
     state.answered = false; // cho phép tiếp tục đoán
     if (state.clueIdx < 2) {
-      // Tự động chuyển sang gợi ý tiếp sau 0.8s
+      // Hiện nút gợi ý tiếp
       clearInterval(state.timer);
-      setTimeout(() => revealClue(state.clueIdx + 1), 800);
+      setTimeout(() => showClueButton(state.clueIdx + 1), 600);
     } else {
       setTimeout(() => loseQuestion(), 400);
     }
