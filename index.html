@@ -55,6 +55,7 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 .btn-primary:hover { opacity: 0.88; }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 .btn-primary:active { transform: scale(0.97); }
 .btn-ghost {
   width: 100%;
@@ -222,7 +223,7 @@ body {
 .setend-total { margin-bottom: 32px; }
 .setend-total-pts { font-size: 52px; font-weight: 900; color: #ffd700; line-height: 1; }
 .setend-total-label { font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 4px; }
-.setend-sync { text-align: center; font-size: 12px; margin: 10px 0 6px; min-height: 16px; color: rgba(255,255,255,0.45); }
+.setend-sync { text-align: center; font-size: 16px; font-weight: 700; margin: 10px 0 6px; min-height: 20px; color: rgba(255,255,255,0.45); }
 .setend-sync.success { color: #4ade80; }
 .setend-sync.error { color: #f87171; }
 .setend-actions { width: 100%; display: flex; flex-direction: column; gap: 10px; }
@@ -282,7 +283,7 @@ body {
   background: rgba(255,215,0,0.18); border-color: rgba(255,215,0,0.5);
   color: #ffd700; font-weight:700;
 }
-.filter-count { font-size:11px; color:rgba(255,255,255,0.35); text-align:right; margin:5px 0 6px; }
+.filter-count { display: none; }
 .question-grid {
   display:flex; flex-wrap:wrap; gap:5px; align-content:flex-start;
   max-height:38vh; overflow-y:auto; margin-bottom:10px;
@@ -379,7 +380,7 @@ body {
     <div class="filter-count" id="filterCount">699 câu đố</div>
 
     <div class="play-actions">
-      <button class="btn-primary" onclick="startFilteredGame('set')">📋 Bộ 10 câu</button>
+      <button class="btn-primary" id="btnPlaySet" onclick="startFilteredGame('set')">📋 Bộ 10 câu</button>
       <button class="btn-ghost" onclick="startFilteredGame('endless')">♾️ Mãi mãi</button>
     </div>
   </div>
@@ -1237,7 +1238,14 @@ function rebuildPool() {
     const groupOk = filterState.group.size === 0 || filterState.group.has(p.group);
     return diffOk && groupOk;
   });
-  document.getElementById('filterCount').textContent = filteredPool.length + ' câu đố';
+  const countEl = document.getElementById('filterCount');
+  countEl.textContent = filteredPool.length + ' câu đố';
+  countEl.classList.toggle('low', filteredPool.length < 10);
+
+  const setBtn = document.getElementById('btnPlaySet');
+  const setCount = Math.min(10, filteredPool.length);
+  setBtn.textContent = '📋 Bộ ' + setCount + ' câu';
+  setBtn.disabled = filteredPool.length === 0;
 }
 
 function buildQuestionGrid() {
