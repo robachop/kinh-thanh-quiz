@@ -222,6 +222,9 @@ body {
 .setend-total { margin-bottom: 32px; }
 .setend-total-pts { font-size: 52px; font-weight: 900; color: #ffd700; line-height: 1; }
 .setend-total-label { font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 4px; }
+.setend-sync { text-align: center; font-size: 12px; margin: 10px 0 6px; min-height: 16px; color: rgba(255,255,255,0.45); }
+.setend-sync.success { color: #4ade80; }
+.setend-sync.error { color: #f87171; }
 .setend-actions { width: 100%; display: flex; flex-direction: column; gap: 10px; }
 
 /* ════════════════════════════════
@@ -238,6 +241,30 @@ body {
 .mana-refill-label { font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
 .mana-refill-time { font-size: 28px; font-weight: 900; color: #00e5ff; }
 .mana-actions { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+
+/* ════════ NAME MODAL ════════ */
+.name-modal-overlay {
+  position: absolute; inset: 0; z-index: 200;
+  background: rgba(10,5,20,0.92);
+  display: none; align-items: center; justify-content: center;
+  padding: 24px;
+}
+.name-modal-overlay.active { display: flex; }
+.name-modal-box {
+  width: 100%; max-width: 320px;
+  background: #1a0a2e; border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 20px; padding: 28px 22px; text-align: center;
+}
+.name-modal-icon { font-size: 36px; margin-bottom: 8px; }
+.name-modal-title { font-size: 17px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+.name-modal-sub { font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 16px; }
+.name-modal-box input {
+  width: 100%; padding: 14px; border-radius: 14px;
+  border: 1.5px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.07);
+  color: #fff; font-size: 16px; text-align: center; margin-bottom: 14px;
+  outline: none;
+}
+.name-modal-box input::placeholder { color: rgba(255,255,255,0.35); }
 
 /* ════════ SCREEN 2 — FILTER & QUESTION BROWSER ════════ */
 #screenMode { padding-top: 16px; flex-direction: column; }
@@ -276,6 +303,17 @@ body {
 <body>
 <div class="app">
 
+  <!-- ══ NHẬP TÊN NGƯỜI CHƠI ══ -->
+  <div class="name-modal-overlay" id="nameModalOverlay">
+    <div class="name-modal-box">
+      <div class="name-modal-icon">🙋</div>
+      <div class="name-modal-title">Em tên là gì?</div>
+      <div class="name-modal-sub">Nhập tên để lưu điểm vào bảng xếp hạng</div>
+      <input type="text" id="nameModalInput" maxlength="20" placeholder="Nhập tên của em" onkeydown="if(event.key==='Enter') confirmPlayerName()">
+      <button class="btn-primary" onclick="confirmPlayerName()">Xác nhận</button>
+    </div>
+  </div>
+
   <!-- ══ SCREEN 1: HOME ══ -->
   <div class="screen active" id="screenHome">
     <div class="page-tag">tr1</div>
@@ -300,7 +338,7 @@ body {
 
 
     <div class="home-bottom">
-      <button class="btn-primary" onclick="goTo('screenMode')">▶ Chơi ngay</button>
+      <button class="btn-primary" onclick="ensureName(() => goTo('screenMode'))">▶ Chơi ngay</button>
     </div>
 
     <div style="margin-top:24px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.15); text-align:center; font-size:12px; color:rgba(255,255,255,0.5); line-height:1.8;">
@@ -315,7 +353,7 @@ body {
   <!-- ══ SCREEN 2: LỌC & CHỌN CÂU ĐỐ ══ -->
   <div class="screen" id="screenMode">
     <div class="page-tag">tr2</div>
-    <div class="mode-mana">Còn 3 ma-na hôm nay</div>
+    <div class="mode-mana" id="modeGreeting">👋 Chào, bạn!</div>
 
     <div class="filter-section">
       <div class="filter-label">Độ khó</div>
@@ -422,6 +460,7 @@ body {
       <div class="setend-total-pts" id="statTotal">190</div>
       <div class="setend-total-label">ta-lân kiếm được</div>
     </div>
+    <div class="setend-sync" id="setendSync"></div>
     <div class="setend-actions">
       <button class="btn-primary" onclick="startGame('set')">🔄 Chơi lại</button>
       <button class="btn-ghost" onclick="goTo('screenHome')">🏠 Về trang chủ</button>
@@ -1469,11 +1508,61 @@ function showSetEnd() {
   document.getElementById('statBest').textContent = state.bestPts;
   document.getElementById('statTotal').textContent = state.earnedThisSet;
   document.getElementById('homeTalan').textContent = state.sessionScore;
+  submitScore(state.earnedThisSet);
   goTo('screenSetEnd');
 }
 
+// ── BẢNG XẾP HẠNG (gửi điểm về Google Sheet) ──
+const SCORE_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwslVgx4VjSZAC2cz1lNyJ6hx2R0RIXo2adr2dFdPTigMyIEmalA1Vlswj0_zqH0i8uEw/exec';
+
+function getPlayerName() {
+  return localStorage.getItem('playerName') || '';
+}
+
+function updateGreeting() {
+  const name = getPlayerName();
+  document.getElementById('modeGreeting').textContent = name ? ('👋 Chào, ' + name + '!') : '👋 Chào bạn!';
+}
+
+let pendingAfterName = null;
+function ensureName(afterConfirm) {
+  if (getPlayerName()) { afterConfirm(); return; }
+  pendingAfterName = afterConfirm;
+  document.getElementById('nameModalInput').value = '';
+  document.getElementById('nameModalOverlay').classList.add('active');
+}
+
+function confirmPlayerName() {
+  const val = document.getElementById('nameModalInput').value.trim();
+  if (!val) return;
+  localStorage.setItem('playerName', val);
+  updateGreeting();
+  document.getElementById('nameModalOverlay').classList.remove('active');
+  const fn = pendingAfterName;
+  pendingAfterName = null;
+  if (fn) fn();
+}
+
+function submitScore(diem) {
+  const ten = getPlayerName();
+  const syncEl = document.getElementById('setendSync');
+  if (!ten || diem <= 0) {
+    if (syncEl) { syncEl.textContent = ''; syncEl.className = 'setend-sync'; }
+    return;
+  }
+  if (syncEl) { syncEl.textContent = '📤 Đang gửi điểm...'; syncEl.className = 'setend-sync'; }
+  fetch(SCORE_ENDPOINT, {
+    method: 'POST',
+    body: JSON.stringify({ ten: ten, diem: diem }),
+  }).then(() => {
+    if (syncEl) { syncEl.textContent = '✅ Đã lưu vào bảng xếp hạng'; syncEl.className = 'setend-sync success'; }
+  }).catch(() => {
+    if (syncEl) { syncEl.textContent = '⚠️ Chưa gửi được điểm (kiểm tra mạng)'; syncEl.className = 'setend-sync error'; }
+  });
+}
+
 // Init
-window.addEventListener('DOMContentLoaded', () => { rebuildPool(); });
+window.addEventListener('DOMContentLoaded', () => { rebuildPool(); updateGreeting(); });
 </script>
 </body>
 </html>
