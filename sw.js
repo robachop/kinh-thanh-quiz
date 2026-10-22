@@ -1,6 +1,6 @@
 // Build injects a complete, versioned precache: offline works on first install.
-const BUILD_ID = '46eebeaa560acb0f';
-const ASSETS = ["./assets/index-CDDLkK7B.js","./assets/index-upGrtNut.css","./icons/icon-192.png","./icons/icon-512-maskable.png","./icons/icon-512.png","./index.html","./manifest.webmanifest"];
+const BUILD_ID = '30297b3e4c13c337';
+const ASSETS = ["./assets/index-XP2ToNS2.js","./assets/index-upGrtNut.css","./icons/icon-192.png","./icons/icon-512-maskable.png","./icons/icon-512.png","./index.html","./manifest.webmanifest"];
 const PREFIX = `dtss-quizhub-${encodeURIComponent(self.registration.scope)}-`;
 const CACHE = PREFIX + BUILD_ID;
 self.addEventListener('install', event => {
