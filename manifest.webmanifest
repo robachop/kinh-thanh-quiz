@@ -1,0 +1,16 @@
+{
+  "name": "Đố Kinh Thánh",
+  "short_name": "Đố Kinh Thánh",
+  "description": "Tôi là ai? và Đoán ô chữ — đố Kinh Thánh hai trò trong một app.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0d1117",
+  "theme_color": "#7c4dff",
+  "lang": "vi",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
